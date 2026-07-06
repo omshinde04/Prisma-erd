@@ -1,26 +1,34 @@
 # Prisma ERD
 
-A production-ready open-source MCP server for parsing Prisma schema files and generating structured graph data for visual ER diagrams.
+Paste a Prisma schema or load a `schema.prisma` file and generate a proper visual ER diagram.
 
 ## Overview
 
-Prisma ERD is being built as a local-first developer tool that integrates with MCP-compatible clients such as Zed Editor. Its purpose is to read a Prisma schema, extract the database structure, convert that structure into a graph representation, and later power a visual ER diagram experience using React Flow and ELK.js.
+Prisma ERD is a production-ready open-source project focused on one simple workflow:
 
-## Project Goals
+- paste Prisma schema text
+- or load a Prisma schema file
+- parse the database structure
+- convert it into graph data
+- render a proper ERD visualizer
 
-The server will progressively support:
+The architecture is being built so the core parsing and graph-generation pipeline stays clean, reusable, and independent from delivery layers such as MCP or a future frontend UI.
 
-- reading `schema.prisma`
-- parsing models
-- parsing enums
-- parsing composite types
-- parsing indexes
-- parsing constraints
-- parsing relations
-- building an internal graph
-- returning structured JSON
-- integrating with Zed through MCP
-- powering a future React Flow-based diagram UI
+## Product Goal
+
+The product should ultimately:
+
+- accept raw Prisma schema text
+- accept `schema.prisma` file input
+- parse models
+- parse enums
+- parse composite types
+- parse indexes
+- parse constraints
+- parse relations
+- build an internal graph
+- produce structured diagram-ready JSON
+- power a proper visual ERD experience
 
 ## Current Status
 
@@ -31,44 +39,74 @@ Completed so far:
 - repository initialization
 - ES Modules setup
 - runnable Node.js bootstrap
-- startup configuration validation
-- schema-based configuration parsing with Zod
+- startup configuration validation with Zod
 - structured JSON logging
-- graceful shutdown support for persistent mode
+- graceful shutdown support
+- schema input contracts for pasted schema and file path input
+- schema source loading service
+- parser pipeline foundation contracts
+- ERD graph foundation contracts
+- focused tests for schema input behavior
 
 Not implemented yet:
 
-- MCP server wiring
-- Prisma schema parsing
-- graph construction
-- frontend diagram rendering
+- real Prisma schema parser
+- relation extraction
+- graph generation from parsed schema
+- frontend visualizer
+- MCP integration
 
 ## Tech Stack
 
 - Node.js (latest LTS target)
 - JavaScript with ES Modules
-- Official MCP SDK
 - Zod
 - React
 - React Flow
 - TailwindCSS
 - ELK.js
+- Official MCP SDK for later integration
 
-## Project Structure
+## Architecture Principles
+
+This repository is being developed with:
+
+- Clean Architecture
+- SOLID design
+- DRY
+- KISS
+- async/await-first implementation
+- production-grade error handling
+- small reusable modules
+- transport-agnostic core services
+
+## Current Project Structure
 
 ```text
 src/
   config/
   core/
+  graph/
   mcp/
   parser/
-  graph/
   services/
   tools/
   utils/
 frontend/
 docs/
 tests/
+```
+
+## Foundation Built in Phase 1
+
+The current codebase now includes the core contracts required to support the future workflow:
+
+```text
+paste schema or load file
+  -> normalize schema source
+  -> create parser request/result contracts
+  -> create ERD graph contracts
+  -> prepare for visualization
 ```
 
 ## Requirements
@@ -86,7 +124,7 @@ npm install
 
 ## Running the Project
 
-### Start the bootstrap runtime
+### Start the application bootstrap
 
 ```bash
 npm start
@@ -94,8 +132,8 @@ npm start
 
 Expected behavior:
 
-- application startup is validated
-- configuration is parsed through a Zod schema
+- startup configuration is validated
+- the ERD pipeline foundation is initialized
 - structured JSON logs are printed
 - the process exits successfully in default `oneshot` mode
 
@@ -108,100 +146,93 @@ APP_STARTUP_MODE=server npm start
 Expected behavior:
 
 - the application starts and stays alive
-- structured logs confirm the runtime is ready
+- logs confirm the runtime is ready
 - the process shuts down gracefully on `SIGINT` or `SIGTERM`
 
-### Development mode
+## Running Tests
 
 ```bash
-npm run dev
+npm test
 ```
 
-### Validate configuration failures
+The current tests validate:
 
-```bash
-NODE_ENV=staging npm start
+- inline Prisma schema input normalization
+- file-based schema loading
+- invalid input handling
+- unreadable file handling
+- initial parser result contract
+- empty ERD graph contract
+
+## Supported Input Modes
+
+### 1. Inline Prisma schema
+The project can normalize raw schema input such as:
+
+```prisma
+model User {
+  id Int @id
+  email String @unique
+}
 ```
 
-Expected behavior:
+### 2. Prisma schema file path
+The project can normalize a file source such as:
 
-- startup fails fast
-- the console prints a readable configuration error
-- invalid fields are listed explicitly
+```text
+./prisma/schema.prisma
+```
 
-## Environment Variables
-
-| Variable | Required | Default | Description |
-| --- | --- | --- | --- |
-| `NODE_ENV` | No | `development` | Runtime environment. Allowed values: `development`, `test`, `production`. |
-| `APP_STARTUP_MODE` | No | `oneshot` | Startup behavior. Allowed values: `oneshot`, `server`. |
-
-## Example Output
-
-### Successful startup
+## Example Runtime Output
 
 ```json
 {"timestamp":"2026-07-06T00:00:00.000Z","level":"info","message":"Starting application bootstrap","service":"prisma-visual-diagram-generator","metadata":{"environment":"development","startupMode":"oneshot"}}
+{"timestamp":"2026-07-06T00:00:00.050Z","level":"info","message":"ERD pipeline foundation is ready","service":"prisma-visual-diagram-generator","metadata":{"supportedInputModes":["schema","filePath"],"graphNodeCount":0,"graphEdgeCount":0}}
 {"timestamp":"2026-07-06T00:00:00.100Z","level":"info","message":"Bootstrap completed successfully","service":"prisma-visual-diagram-generator","metadata":{"status":"ready","mode":"oneshot"}}
 ```
 
-### Invalid configuration
-
-```text
-[fatal] Application failed to start
-Invalid application configuration
-- nodeEnv: Invalid option: expected one of "development"|"test"|"production"
-```
-
-## Architecture Direction
-
-This repository is being developed with the following principles:
-
-- Clean Architecture
-- SOLID design
-- DRY
-- KISS
-- small reusable modules
-- production-grade error handling
-- async/await-first implementation style
-
 ## Roadmap
 
-### Phase 1 — Project Initialization
+### Phase 1 — Core Foundation
 - runtime bootstrap
-- config foundation
-- MCP server skeleton
-- first MCP tool contract
-- documentation improvements
-- test foundation
+- validated configuration
+- schema input contracts
+- schema source loading service
+- parser contracts
+- graph contracts
+- tests and documentation
 
-### Phase 2 — Prisma Schema Intelligence
-- Prisma schema reader
-- parser modules for models, enums, composite types, indexes, and constraints
-- internal graph builder
-- structured JSON output contracts
+### Phase 2 — Prisma Schema Parsing
+- parse Prisma schema content
+- extract models, fields, enums, and relations
+- normalize parser output
 
-### Phase 3 — Visual Diagram Layer
-- React frontend foundation
-- React Flow graph rendering
+### Phase 3 — ERD Graph Generation
+- convert parsed schema into nodes and edges
+- enrich metadata for visualization
+- prepare diagram-ready payloads
+
+### Phase 4 — Visualizer UI
+- add React frontend foundation
+- render ERD using React Flow
 - automatic layout with ELK.js
-- richer interactions and diagram UX
+- support paste and file upload flows
+
+### Phase 5 — Integration Layer
+- MCP server and Zed integration
+- editor-driven schema workflows
+- richer generation and visualization tooling
 
 ## Validation
 
-Current validation performed locally:
+Current validation performed locally should include:
 
 ```bash
 npm install
 npm start
+npm test
 NODE_ENV=staging npm start
 ```
-
-This confirms the bootstrap entrypoint runs successfully and invalid runtime configuration fails fast with readable output.
-
-## Contributing
-
-This project is under active development. Once the MCP server skeleton and parser contracts are stable, contribution guidelines and issue templates can be added.
 
 ## License
 
