@@ -44,14 +44,19 @@ Completed so far:
 - graceful shutdown support
 - schema input contracts for pasted schema and file path input
 - schema source loading service
-- parser pipeline foundation contracts
+- parser pipeline contracts
 - ERD graph foundation contracts
-- focused tests for schema input behavior
+- Prisma schema parser foundation
+- model extraction
+- enum extraction
+- basic relation extraction between parsed models
+- focused tests for input and parser behavior
 
 Not implemented yet:
 
-- real Prisma schema parser
-- relation extraction
+- composite type parsing
+- index extraction
+- constraint extraction
 - graph generation from parsed schema
 - frontend visualizer
 - MCP integration
@@ -97,17 +102,36 @@ docs/
 tests/
 ```
 
-## Foundation Built in Phase 1
+## Foundation Built So Far
 
-The current codebase now includes the core contracts required to support the future workflow:
+The current codebase now supports this pipeline:
 
 ```text
 paste schema or load file
   -> normalize schema source
-  -> create parser request/result contracts
-  -> create ERD graph contracts
-  -> prepare for visualization
+  -> parse models, enums, and basic relations
+  -> normalize parse result
+  -> prepare for graph generation
 ```
+
+## Currently Supported Parsing
+
+The parser foundation currently supports:
+
+- `model` blocks
+- `enum` blocks
+- scalar field extraction
+- relation-like field detection
+- basic relation extraction between parsed models
+- model block attributes collection
+- parser metadata counts
+
+### Important limitation
+
+At this stage, any non-scalar field whose type matches a parsed model is treated as a relation candidate.
+Enum fields are currently parsed as non-scalar fields in the model field contract, but relation extraction only produces edges when the target type is another parsed model.
+
+This is acceptable for the current milestone and will be refined in future parser milestones.
 
 ## Requirements
 
@@ -163,25 +187,42 @@ The current tests validate:
 - unreadable file handling
 - initial parser result contract
 - empty ERD graph contract
+- model extraction
+- enum extraction
+- relation extraction between parsed models
+- parser metadata counts
 
-## Supported Input Modes
-
-### 1. Inline Prisma schema
-The project can normalize raw schema input such as:
+## Example Supported Schema
 
 ```prisma
+enum Role {
+  USER
+  ADMIN
+}
+
 model User {
   id Int @id
   email String @unique
+  role Role
+  posts Post[]
+}
+
+model Post {
+  id Int @id
+  title String
+  user User @relation(fields: [userId], references: [id])
+  userId Int
 }
 ```
 
-### 2. Prisma schema file path
-The project can normalize a file source such as:
+## Example Parse Behavior
 
-```text
-./prisma/schema.prisma
-```
+From the schema above, the parser foundation can currently identify:
+
+- models: `User`, `Post`
+- enum: `Role`
+- relation from `User.posts` to `Post`
+- relation from `Post.user` to `User`
 
 ## Example Runtime Output
 
@@ -199,13 +240,16 @@ The project can normalize a file source such as:
 - schema input contracts
 - schema source loading service
 - parser contracts
+- parser foundation for models, enums, and relations
 - graph contracts
 - tests and documentation
 
-### Phase 2 — Prisma Schema Parsing
-- parse Prisma schema content
-- extract models, fields, enums, and relations
-- normalize parser output
+### Phase 2 — Richer Prisma Schema Intelligence
+- composite type parsing
+- index extraction
+- constraint extraction
+- richer field metadata
+- improved Prisma syntax coverage
 
 ### Phase 3 — ERD Graph Generation
 - convert parsed schema into nodes and edges
