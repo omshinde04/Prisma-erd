@@ -1,0 +1,31 @@
+# Node Modules
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Environment
+.env
+
+# Coverage
+coverage/
+
+# Build
+dist/
+build/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary
+tmp/
+temp/
+
+# OS Files
+Thumbs.db
