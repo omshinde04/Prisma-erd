@@ -45,19 +45,21 @@ Completed so far:
 - schema input contracts for pasted schema and file path input
 - schema source loading service
 - parser pipeline contracts
-- ERD graph foundation contracts
+- ERD graph contracts
 - Prisma schema parser foundation
 - model extraction
 - enum extraction
 - basic relation extraction between parsed models
-- focused tests for input and parser behavior
+- ERD graph generation foundation
+- end-to-end core service from schema input to graph output
+- focused tests for input, parsing, and graph generation behavior
 
 Not implemented yet:
 
 - composite type parsing
 - index extraction
 - constraint extraction
-- graph generation from parsed schema
+- richer field classification
 - frontend visualizer
 - MCP integration
 
@@ -102,7 +104,7 @@ docs/
 tests/
 ```
 
-## Foundation Built So Far
+## Core Pipeline Implemented So Far
 
 The current codebase now supports this pipeline:
 
@@ -110,8 +112,8 @@ The current codebase now supports this pipeline:
 paste schema or load file
   -> normalize schema source
   -> parse models, enums, and basic relations
-  -> normalize parse result
-  -> prepare for graph generation
+  -> generate ERD nodes and edges
+  -> return diagram-ready graph output
 ```
 
 ## Currently Supported Parsing
@@ -132,6 +134,37 @@ At this stage, any non-scalar field whose type matches a parsed model is treated
 Enum fields are currently parsed as non-scalar fields in the model field contract, but relation extraction only produces edges when the target type is another parsed model.
 
 This is acceptable for the current milestone and will be refined in future parser milestones.
+
+## Current Graph Output
+
+The graph generation foundation currently supports:
+
+- model nodes
+- enum nodes
+- relation edges
+- visualization-friendly node data
+- visualization-friendly edge data
+- graph metadata with node and edge counts
+
+### Node output
+
+Model nodes currently include:
+- model name
+- field list
+- block attributes
+
+Enum nodes currently include:
+- enum name
+- enum values
+
+### Edge output
+
+Relation edges currently include:
+- source model
+- target model
+- relation field name
+- relation arity
+- raw relation field attributes
 
 ## Requirements
 
@@ -191,6 +224,9 @@ The current tests validate:
 - enum extraction
 - relation extraction between parsed models
 - parser metadata counts
+- graph node generation
+- graph edge generation
+- end-to-end ERD generation service behavior
 
 ## Example Supported Schema
 
@@ -215,21 +251,58 @@ model Post {
 }
 ```
 
-## Example Parse Behavior
+## Example Graph Behavior
 
-From the schema above, the parser foundation can currently identify:
+From the schema above, the current ERD generation foundation can create:
 
-- models: `User`, `Post`
-- enum: `Role`
-- relation from `User.posts` to `Post`
-- relation from `Post.user` to `User`
+- model node: `User`
+- model node: `Post`
+- enum node: `Role`
+- relation edge: `User.posts -> Post`
+- relation edge: `Post.user -> User`
 
-## Example Runtime Output
+## Example Graph Output Shape
 
 ```json
-{"timestamp":"2026-07-06T00:00:00.000Z","level":"info","message":"Starting application bootstrap","service":"prisma-visual-diagram-generator","metadata":{"environment":"development","startupMode":"oneshot"}}
-{"timestamp":"2026-07-06T00:00:00.050Z","level":"info","message":"ERD pipeline foundation is ready","service":"prisma-visual-diagram-generator","metadata":{"supportedInputModes":["schema","filePath"],"graphNodeCount":0,"graphEdgeCount":0}}
-{"timestamp":"2026-07-06T00:00:00.100Z","level":"info","message":"Bootstrap completed successfully","service":"prisma-visual-diagram-generator","metadata":{"status":"ready","mode":"oneshot"}}
+{
+  "nodes": [
+    {
+      "id": "model:User",
+      "type": "model",
+      "label": "User",
+      "data": {
+        "name": "User",
+        "fields": [
+          {
+            "name": "id",
+            "type": "Int",
+            "kind": "scalar",
+            "isList": false,
+            "isOptional": false,
+            "attributes": ["@id"]
+          }
+        ],
+        "blockAttributes": []
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "relation:Post:user:User",
+      "source": "model:Post",
+      "target": "model:User",
+      "label": "user",
+      "type": "relation",
+      "data": {
+        "from": "Post",
+        "to": "User",
+        "field": "user",
+        "arity": "one",
+        "attributes": ["@relation(fields:", "[userId],", "references:", "[id])"]
+      }
+    }
+  ]
+}
 ```
 
 ## Roadmap
@@ -242,6 +315,7 @@ From the schema above, the parser foundation can currently identify:
 - parser contracts
 - parser foundation for models, enums, and relations
 - graph contracts
+- graph generation foundation
 - tests and documentation
 
 ### Phase 2 — Richer Prisma Schema Intelligence
@@ -251,18 +325,13 @@ From the schema above, the parser foundation can currently identify:
 - richer field metadata
 - improved Prisma syntax coverage
 
-### Phase 3 — ERD Graph Generation
-- convert parsed schema into nodes and edges
-- enrich metadata for visualization
-- prepare diagram-ready payloads
-
-### Phase 4 — Visualizer UI
+### Phase 3 — Visualizer UI Foundation
 - add React frontend foundation
 - render ERD using React Flow
 - automatic layout with ELK.js
 - support paste and file upload flows
 
-### Phase 5 — Integration Layer
+### Phase 4 — Integration Layer
 - MCP server and Zed integration
 - editor-driven schema workflows
 - richer generation and visualization tooling
