@@ -1,0 +1,728 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    font-family:
+      Inter,
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
+    background:
+      radial-gradient(circle at top, rgba(14, 165, 233, 0.12), transparent 32%),
+      linear-gradient(180deg, #020617 0%, #0f172a 100%);
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    @apply m-0 min-w-[320px] bg-transparent text-slate-100 antialiased;
+  }
+
+  button,
+  textarea,
+  input {
+    font: inherit;
+  }
+
+  code {
+    font-family:
+      "SFMono-Regular", SFMono-Regular, Consolas, "Liberation Mono", Menlo,
+      monospace;
+  }
+}
+
+@layer components {
+  .app-shell {
+    @apply min-h-screen bg-ink-950 text-slate-100;
+    background-image:
+      radial-gradient(
+        circle at top,
+        rgba(103, 232, 249, 0.08),
+        transparent 25%
+      ),
+      linear-gradient(180deg, rgba(5, 8, 22, 1), rgba(10, 15, 32, 1));
+  }
+
+  .app-layout {
+    @apply grid min-h-screen grid-cols-1 xl:grid-cols-[420px_minmax(0,1fr)];
+  }
+
+  .sidebar {
+    @apply border-b border-slate-800/80 bg-slate-950/70 p-5 backdrop-blur-xl xl:border-b-0 xl:border-r;
+  }
+
+  .sidebar-stack {
+    @apply flex h-full flex-col gap-4;
+  }
+
+  .workspace {
+    @apply flex min-h-[70vh] flex-col gap-4 p-4 lg:p-5;
+  }
+
+  .workspace-shell {
+    @apply flex h-full min-h-[calc(100vh-2rem)] flex-col overflow-hidden rounded-[28px] border border-slate-800/80 bg-slate-950/40 shadow-panel;
+  }
+
+  .workspace-header {
+    @apply flex flex-col gap-4 border-b border-slate-800/70 px-5 py-4 lg:flex-row lg:items-end lg:justify-between;
+  }
+
+  .workspace-title {
+    @apply text-4xl font-bold tracking-tight text-slate-50;
+  }
+
+  .workspace-subtitle {
+    @apply mt-2 max-w-3xl text-lg text-slate-400;
+  }
+
+  .workspace-metrics {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .metric-pill {
+    @apply inline-flex items-center gap-2 rounded-full border border-slate-700/70 bg-slate-900/80 px-3 py-1.5 text-sm font-medium text-slate-200;
+  }
+
+  .metric-pill__value {
+    @apply text-cyan-300;
+  }
+
+  .eyebrow {
+    @apply mb-3 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300;
+  }
+
+  .sidebar-title {
+    @apply text-3xl font-bold tracking-tight text-slate-50;
+  }
+
+  .sidebar-description {
+    @apply mt-3 text-sm leading-6 text-slate-400;
+  }
+
+  .panel {
+    @apply rounded-3xl border border-slate-800/70 bg-slate-900/75 p-4 shadow-soft backdrop-blur-md;
+  }
+
+  .panel__header {
+    @apply flex flex-col gap-1;
+  }
+
+  .panel__title {
+    @apply text-base font-semibold text-slate-50;
+  }
+
+  .panel__description {
+    @apply text-sm text-slate-400;
+  }
+
+  .field {
+    @apply mt-4 flex flex-col gap-2;
+  }
+
+  .field__label {
+    @apply text-sm font-medium text-slate-300;
+  }
+
+  .schema-textarea {
+    @apply min-h-[340px] w-full rounded-2xl border border-slate-700/70 bg-slate-950/90 px-4 py-4 text-sm leading-6 text-slate-100 outline-none transition;
+    box-shadow: inset 0 1px 0 rgba(148, 163, 184, 0.08);
+  }
+
+  .schema-textarea:focus {
+    @apply border-cyan-400/60 ring-4 ring-cyan-400/10;
+  }
+
+  .panel__actions,
+  .export-grid {
+    @apply mt-4 flex flex-wrap gap-3;
+  }
+
+  .export-grid > * {
+    @apply flex-1 basis-[180px];
+  }
+
+  .button {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-2xl border px-4 text-sm font-medium transition duration-150 ease-out;
+  }
+
+  .button:hover:not(:disabled) {
+    @apply -translate-y-0.5;
+  }
+
+  .button:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+
+  .button--primary {
+    @apply border-cyan-400/30 bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-lg shadow-cyan-500/10;
+  }
+
+  .button--secondary {
+    @apply border-slate-700/80 bg-slate-900/90 text-slate-100;
+  }
+
+  .button--ghost {
+    @apply border-slate-700/70 bg-transparent text-slate-300;
+  }
+
+  .file-button {
+    @apply relative overflow-hidden;
+  }
+
+  .export-open-button {
+    @apply w-full;
+  }
+
+  .status-grid {
+    @apply mt-4 grid grid-cols-2 gap-3;
+  }
+
+  .status-card {
+    @apply rounded-2xl border border-slate-800/70 bg-slate-950/60 p-3;
+  }
+
+  .status-card__label {
+    @apply text-xs uppercase tracking-[0.16em] text-slate-500;
+  }
+
+  .status-card__value {
+    @apply mt-1 text-2xl font-semibold text-slate-50;
+  }
+
+  .status-badge {
+    @apply inline-flex w-fit items-center rounded-full border px-3 py-1 text-xs font-semibold;
+  }
+
+  .status-badge--idle {
+    @apply border-blue-400/20 bg-blue-400/10 text-blue-200;
+  }
+
+  .status-badge--loading {
+    @apply border-amber-400/20 bg-amber-400/10 text-amber-200;
+  }
+
+  .status-badge--success {
+    @apply border-emerald-400/20 bg-emerald-400/10 text-emerald-200;
+  }
+
+  .status-badge--error {
+    @apply border-rose-400/20 bg-rose-400/10 text-rose-200;
+  }
+
+  .status-error {
+    @apply mt-3 rounded-2xl border border-rose-400/20 bg-rose-400/10 px-3 py-2 text-sm text-rose-200;
+  }
+
+  .diagram-card,
+  .diagram-empty-state {
+    @apply flex-1 overflow-hidden rounded-[28px] border border-slate-800/70 bg-slate-950/70 shadow-panel;
+  }
+
+  .diagram-card {
+    @apply flex flex-col;
+  }
+
+  .diagram-card__header {
+    @apply flex flex-col gap-4 border-b border-slate-800/70 px-5 py-4 lg:flex-row lg:items-start lg:justify-between;
+  }
+
+  .diagram-card__title {
+    @apply text-2xl font-semibold text-slate-50;
+  }
+
+  .diagram-card__description {
+    @apply mt-1 text-sm text-slate-400;
+  }
+
+  .diagram-hint {
+    @apply inline-flex items-center rounded-full border border-slate-700/70 bg-slate-900/90 px-4 py-2 text-sm text-slate-200;
+  }
+
+  .diagram-flow {
+    @apply relative flex-1 overflow-hidden p-4;
+    background-image:
+      linear-gradient(rgba(15, 23, 42, 0.22) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15, 23, 42, 0.22) 1px, transparent 1px),
+      radial-gradient(circle at top, rgba(56, 189, 248, 0.08), transparent 28%),
+      linear-gradient(180deg, rgba(2, 6, 23, 0.96), rgba(10, 15, 32, 0.98));
+    background-size:
+      24px 24px,
+      24px 24px,
+      auto,
+      auto;
+  }
+
+  .diagram-empty-state {
+    @apply flex items-center justify-center p-8 text-center;
+  }
+
+  .diagram-empty-state__content {
+    @apply max-w-xl;
+  }
+
+  .diagram-empty-state__title {
+    @apply text-3xl font-semibold text-slate-50;
+  }
+
+  .diagram-empty-state__description {
+    @apply mt-3 text-base leading-7 text-slate-400;
+  }
+
+  .diagram-node {
+    @apply overflow-hidden rounded-[18px] border border-slate-700/90 bg-slate-950 text-slate-100 shadow-soft;
+    background-color: rgba(2, 6, 23, 0.985);
+    box-shadow:
+      0 18px 36px rgba(2, 6, 23, 0.34),
+      inset 0 1px 0 rgba(148, 163, 184, 0.06);
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease,
+      opacity 160ms ease,
+      border-color 160ms ease;
+  }
+
+  .diagram-node--model {
+    box-shadow:
+      0 18px 36px rgba(2, 6, 23, 0.34),
+      inset 0 3px 0 rgba(34, 211, 238, 0.35),
+      inset 0 1px 0 rgba(148, 163, 184, 0.06);
+  }
+
+  .diagram-node--enum {
+    box-shadow:
+      0 18px 36px rgba(2, 6, 23, 0.34),
+      inset 0 3px 0 rgba(168, 85, 247, 0.34),
+      inset 0 1px 0 rgba(148, 163, 184, 0.06);
+  }
+
+  .diagram-node--selected {
+    border-color: rgba(103, 232, 249, 0.78);
+    box-shadow:
+      0 0 0 1px rgba(103, 232, 249, 0.25),
+      0 18px 40px rgba(8, 145, 178, 0.24),
+      inset 0 3px 0 rgba(34, 211, 238, 0.45);
+  }
+
+  .diagram-node--search-match {
+    border-color: rgba(56, 189, 248, 0.6);
+  }
+
+  .diagram-node--dimmed {
+    opacity: 0.38;
+  }
+
+  .diagram-node__handle {
+    width: 1px !important;
+    height: 1px !important;
+    min-width: 1px;
+    min-height: 1px;
+    background: transparent !important;
+    border: none !important;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .diagram-node__header {
+    @apply border-b border-slate-700/80 px-4 py-3;
+    background-image: linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.98),
+      rgba(2, 6, 23, 0.98)
+    );
+  }
+
+  .diagram-node__title-row {
+    @apply flex items-start justify-between gap-3;
+  }
+
+  .diagram-node__title-block {
+    @apply min-w-0;
+  }
+
+  .diagram-node__title {
+    @apply text-[13px] font-semibold uppercase tracking-[0.08em] text-slate-50;
+  }
+
+  .diagram-node__mapped-name {
+    @apply mt-1 truncate font-mono text-[11px] text-cyan-300;
+  }
+
+  .diagram-node__kind {
+    @apply rounded-full border border-slate-700/70 bg-slate-950/80 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-300;
+  }
+
+  .diagram-node__meta {
+    @apply mt-1.5 text-[11px] text-slate-500;
+  }
+
+  .diagram-node__body--sectioned {
+    @apply flex flex-col gap-2 p-2;
+  }
+
+  .diagram-section {
+    @apply overflow-hidden rounded-xl border border-slate-800/70 bg-slate-950/70;
+  }
+
+  .diagram-section__header {
+    @apply border-b border-slate-800/80 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500;
+    background-color: rgba(15, 23, 42, 0.72);
+  }
+
+  .diagram-section__body {
+    @apply flex flex-col gap-0 p-0;
+  }
+
+  .diagram-field-row,
+  .diagram-enum-row {
+    @apply border-b border-slate-800/70 bg-slate-950/85;
+  }
+
+  .diagram-section__body > :last-child,
+  .diagram-node__footer-section > :last-child {
+    border-bottom: 0;
+  }
+
+  .diagram-field-row {
+    display: grid;
+    grid-template-columns:
+      38px minmax(130px, 1.25fr) minmax(90px, 0.9fr)
+      minmax(120px, 1.7fr) minmax(60px, 0.8fr);
+    align-items: stretch;
+    min-height: 42px;
+  }
+
+  .diagram-field-row--table-head {
+    background-color: rgba(15, 23, 42, 0.92);
+  }
+
+  .diagram-field-row--table-head .diagram-field-row__indicator,
+  .diagram-field-row--table-head .diagram-field-row__name,
+  .diagram-field-row--table-head .diagram-field-row__type,
+  .diagram-field-row--table-head .diagram-field-row__attributes,
+  .diagram-field-row--table-head .diagram-field-row__badges {
+    @apply text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400;
+  }
+
+  .diagram-field-row__indicator,
+  .diagram-field-row__name,
+  .diagram-field-row__type,
+  .diagram-field-row__attributes,
+  .diagram-field-row__badges {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: 0.65rem 0.75rem;
+    border-right: 1px solid rgba(30, 41, 59, 0.65);
+  }
+
+  .diagram-field-row__badges {
+    border-right: 0;
+  }
+
+  .diagram-field-row__indicator {
+    justify-content: center;
+    padding: 0.65rem 0.4rem;
+    background-color: rgba(15, 23, 42, 0.92);
+    font-size: 11px;
+    color: rgb(148, 163, 184);
+  }
+
+  .diagram-field-row--pk .diagram-field-row__indicator {
+    color: rgb(253, 230, 138);
+    background-color: rgba(120, 53, 15, 0.3);
+  }
+
+  .diagram-field-row--fk .diagram-field-row__indicator {
+    color: rgb(165, 243, 252);
+    background-color: rgba(8, 47, 73, 0.48);
+  }
+
+  .diagram-field-row--relation .diagram-field-row__indicator {
+    color: rgb(221, 214, 254);
+    background-color: rgba(59, 7, 100, 0.32);
+  }
+
+  .diagram-field-row--nullable .diagram-field-row__name,
+  .diagram-field-row--nullable .diagram-field-row__type {
+    color: rgb(148, 163, 184);
+  }
+
+  .diagram-field-row__name {
+    @apply truncate text-[12px] font-semibold text-slate-100;
+  }
+
+  .diagram-field-row__type {
+    @apply truncate font-mono text-[11px] text-cyan-200;
+  }
+
+  .diagram-field-row__attributes {
+    @apply truncate font-mono text-[10px] text-slate-500;
+  }
+
+  .diagram-field-row__badges {
+    @apply flex flex-wrap justify-start gap-1;
+  }
+
+  .diagram-enum-row {
+    @apply flex items-center gap-2 px-3 py-2 text-[11px] leading-4 text-violet-200;
+  }
+
+  .diagram-enum-row__bullet {
+    @apply text-violet-400;
+  }
+
+  .diagram-badge {
+    @apply inline-flex min-h-[16px] items-center justify-center rounded-full px-1.5 py-0 text-[9px] font-bold uppercase tracking-[0.12em];
+  }
+
+  .diagram-badge--pk {
+    @apply bg-amber-400/15 text-amber-200;
+  }
+
+  .diagram-badge--fk {
+    @apply bg-cyan-400/15 text-cyan-200;
+  }
+
+  .diagram-badge--uq {
+    @apply bg-violet-400/15 text-violet-200;
+  }
+
+  .diagram-node__footer {
+    @apply grid grid-cols-1 gap-2 border-t border-slate-800/80 bg-slate-950/80 p-2;
+  }
+
+  .diagram-node__footer-section {
+    @apply overflow-hidden rounded-xl border border-slate-800/70;
+  }
+
+  .diagram-node__footer-title {
+    @apply border-b border-slate-800/80 bg-slate-900/80 px-3 py-1.5 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500;
+  }
+
+  .diagram-node__footer-item,
+  .diagram-node__footer-empty {
+    @apply border-b border-slate-800/60 px-3 py-2 font-mono text-[10px] text-slate-400;
+  }
+
+  .diagram-node__empty,
+  .diagram-node__collapsed-hint {
+    @apply px-3 py-2 text-[11px] text-slate-500;
+  }
+
+  .diagram-toolbar {
+    @apply flex flex-wrap items-center gap-2;
+  }
+
+  .diagram-toolbar__button {
+    @apply inline-flex min-h-[42px] items-center justify-center rounded-2xl border border-slate-600/80 bg-slate-900/95 px-4 text-sm font-medium text-slate-100 shadow-soft transition hover:-translate-y-0.5;
+  }
+
+  .diagram-search,
+  .diagram-legend {
+    @apply min-w-[240px] rounded-2xl border border-slate-700/70 bg-slate-950/95 px-3 py-3 shadow-soft;
+  }
+
+  .diagram-search {
+    @apply mb-3;
+  }
+
+  .diagram-search__title,
+  .diagram-legend__title {
+    @apply text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-300;
+  }
+
+  .diagram-search__row {
+    @apply mt-3;
+  }
+
+  .diagram-search__input {
+    @apply w-full rounded-xl border border-slate-700/80 bg-slate-900/90 px-3 py-2 text-sm text-slate-100 outline-none transition;
+  }
+
+  .diagram-search__input:focus {
+    @apply border-cyan-400/60 ring-4 ring-cyan-400/10;
+  }
+
+  .diagram-search__actions {
+    @apply mt-3 flex gap-2;
+  }
+
+  .diagram-search__meta {
+    @apply mt-2 text-[11px] text-slate-400;
+  }
+
+  .diagram-legend__items {
+    @apply mt-3 flex flex-col gap-2;
+  }
+
+  .diagram-legend__item {
+    @apply flex items-center gap-2 text-[11px] text-slate-300;
+  }
+
+  .diagram-legend__swatch {
+    width: 24px;
+    height: 0;
+    border-top-width: 3px;
+    border-top-style: solid;
+    border-radius: 9999px;
+    display: inline-block;
+    position: relative;
+    flex: 0 0 auto;
+  }
+
+  .diagram-legend__swatch::after {
+    content: "";
+    position: absolute;
+    right: -1px;
+    top: -5px;
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 7px solid currentColor;
+  }
+
+  .diagram-legend__swatch--fk-many {
+    color: #06b6d4;
+    border-top-color: #06b6d4;
+  }
+
+  .diagram-legend__swatch--fk-one {
+    color: #3b82f6;
+    border-top-color: #3b82f6;
+  }
+
+  .diagram-legend__swatch--many-to-many {
+    color: #8b5cf6;
+    border-top-color: #8b5cf6;
+    border-top-style: dashed;
+  }
+
+  .diagram-legend__swatch--self {
+    color: #f59e0b;
+    border-top-color: #f59e0b;
+    border-top-style: dashed;
+  }
+
+  .diagram-legend__swatch--implicit-many {
+    color: #a855f7;
+    border-top-color: #a855f7;
+    border-top-style: dashed;
+  }
+
+  .diagram-edge-markers {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: visible;
+  }
+
+  .diagram-edge-label {
+    @apply absolute min-w-[170px] max-w-[300px] rounded-xl border px-2.5 py-1.5 text-center text-slate-100 shadow-soft;
+    pointer-events: none;
+    background-color: rgba(2, 6, 23, 0.96);
+  }
+
+  .diagram-edge-label--selected {
+    box-shadow:
+      0 0 0 1px rgba(103, 232, 249, 0.22),
+      0 8px 24px rgba(34, 211, 238, 0.18);
+  }
+
+  .diagram-edge-label--fk-many {
+    @apply border-cyan-400/30;
+    box-shadow: 0 8px 24px rgba(34, 211, 238, 0.18);
+  }
+
+  .diagram-edge-label--fk-one {
+    @apply border-blue-400/30;
+    box-shadow: 0 8px 24px rgba(96, 165, 250, 0.16);
+  }
+
+  .diagram-edge-label--implicit-many,
+  .diagram-edge-label--many-to-many {
+    @apply border-violet-400/25;
+    box-shadow: 0 8px 24px rgba(192, 132, 252, 0.13);
+  }
+
+  .diagram-edge-label--implicit-one {
+    @apply border-slate-500/30;
+    box-shadow: 0 8px 24px rgba(100, 116, 139, 0.12);
+  }
+
+  .diagram-edge-label--self {
+    @apply border-amber-400/30;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.14);
+  }
+
+  .diagram-edge-label__title {
+    @apply text-[11px] font-semibold text-slate-100;
+  }
+
+  .diagram-edge-label__meta {
+    @apply mt-0.5 flex flex-wrap justify-center gap-1 text-[10px] text-slate-400;
+  }
+
+  .diagram-edge-label__mapping {
+    @apply mt-1 text-[10px] font-semibold text-cyan-200;
+  }
+
+  .diagram-edge-label__constraint {
+    @apply mt-1 text-[10px] text-slate-500;
+  }
+
+  .diagram-edge-label__badge {
+    @apply rounded-full border border-white/10 bg-white/5 px-1.5 py-0 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-200;
+  }
+
+  .diagram-edge-label__arrow {
+    @apply text-cyan-300;
+  }
+
+  .react-flow {
+    @apply rounded-[24px] bg-transparent;
+  }
+
+  .react-flow__edge-path {
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .react-flow__controls,
+  .react-flow__minimap,
+  .react-flow__panel {
+    @apply rounded-2xl border border-slate-700/70 bg-slate-950/95 shadow-soft;
+  }
+
+  .react-flow__controls button {
+    @apply border-b border-slate-800/70 bg-transparent text-slate-100;
+  }
+
+  .react-flow__controls button svg {
+    @apply fill-slate-100;
+  }
+
+  .react-flow__minimap {
+    @apply overflow-hidden;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

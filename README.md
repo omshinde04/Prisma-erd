@@ -11,8 +11,9 @@ Prisma ERD is a production-ready open-source project focused on one simple workf
 - parse the database structure
 - convert it into graph data
 - render a proper ERD visualizer
+- export and share the resulting diagram artifacts
 
-The architecture is being built so the core parsing and graph-generation pipeline stays clean, reusable, and independent from delivery layers such as MCP or a future frontend UI.
+The architecture is being built so the core parsing and graph-generation pipeline stays clean, reusable, and independent from delivery layers such as MCP or the browser UI.
 
 ## Product Goal
 
@@ -28,7 +29,9 @@ The product should ultimately:
 - parse relations
 - build an internal graph
 - produce structured diagram-ready JSON
-- power a proper visual ERD experience
+- render a visual ERD
+- export the graph or image in suitable formats
+- support future shareable diagram workflows
 
 ## Current Status
 
@@ -52,7 +55,13 @@ Completed so far:
 - basic relation extraction between parsed models
 - ERD graph generation foundation
 - end-to-end core service from schema input to graph output
-- focused tests for input, parsing, and graph generation behavior
+- frontend visualizer foundation with React, Vite, React Flow, and ELK.js
+- paste-based schema input UI
+- browser file upload workflow for Prisma schema files
+- automatic layout of generated ERD graphs
+- graph JSON export
+- PNG diagram export
+- reopenable snapshot save/open workflow
 
 Not implemented yet:
 
@@ -60,19 +69,26 @@ Not implemented yet:
 - index extraction
 - constraint extraction
 - richer field classification
-- frontend visualizer
+- hosted link-sharing workflow
 - MCP integration
 
 ## Tech Stack
 
+### Core
 - Node.js (latest LTS target)
 - JavaScript with ES Modules
 - Zod
+
+### Frontend
 - React
+- Vite
 - React Flow
-- TailwindCSS
 - ELK.js
-- Official MCP SDK for later integration
+- html-to-image
+
+### Planned later
+- Official MCP SDK
+- hosted share-link infrastructure
 
 ## Architecture Principles
 
@@ -86,6 +102,7 @@ This repository is being developed with:
 - production-grade error handling
 - small reusable modules
 - transport-agnostic core services
+- export-ready and sharing-ready UI state boundaries
 
 ## Current Project Structure
 
@@ -100,13 +117,17 @@ src/
   tools/
   utils/
 frontend/
+  src/
+    components/
+    lib/
+    styles/
 docs/
 tests/
 ```
 
 ## Core Pipeline Implemented So Far
 
-The current codebase now supports this pipeline:
+The current codebase now supports this backend flow:
 
 ```text
 paste schema or load file
@@ -116,24 +137,46 @@ paste schema or load file
   -> return diagram-ready graph output
 ```
 
-## Currently Supported Parsing
+The frontend visualizer now supports this browser flow:
 
-The parser foundation currently supports:
+```text
+paste schema or upload file
+  -> parse schema in browser-safe adapter
+  -> generate ERD graph
+  -> run ELK layout
+  -> render diagram with React Flow
+  -> export graph, image, or snapshot
+```
 
-- `model` blocks
-- `enum` blocks
-- scalar field extraction
-- relation-like field detection
-- basic relation extraction between parsed models
-- model block attributes collection
-- parser metadata counts
+## Frontend Visualizer
 
-### Important limitation
+The frontend visualizer currently provides:
 
-At this stage, any non-scalar field whose type matches a parsed model is treated as a relation candidate.
-Enum fields are currently parsed as non-scalar fields in the model field contract, but relation extraction only produces edges when the target type is another parsed model.
+- schema textarea for pasted Prisma schema
+- file upload for local Prisma schema files
+- status panel with counts
+- interactive diagram canvas
+- zoom, pan, minimap, and fit-view behavior
+- automatic layout using ELK.js
+- graph JSON export
+- PNG export of the current diagram view
+- snapshot save and reopen workflow
 
-This is acceptable for the current milestone and will be refined in future parser milestones.
+### Snapshot sharing workflow
+
+A snapshot file contains:
+
+- schema text
+- parse result
+- graph output
+- export metadata
+
+This lets one developer generate a diagram, save it, send the snapshot file to another developer, and reopen the same result later.
+
+### Current UI limitation
+
+The browser visualizer currently uses a browser-safe ERD generation adapter that mirrors the core parsing and graph logic.
+This keeps the frontend usable now, but in a later milestone we should unify shared parsing/graph modules more elegantly across environments.
 
 ## Current Graph Output
 
@@ -146,25 +189,23 @@ The graph generation foundation currently supports:
 - visualization-friendly edge data
 - graph metadata with node and edge counts
 
-### Node output
+## Export and Sharing Support
 
-Model nodes currently include:
-- model name
-- field list
-- block attributes
+### Export Graph JSON
+Downloads the generated graph as structured JSON.
 
-Enum nodes currently include:
-- enum name
-- enum values
+### Export PNG
+Downloads the currently rendered diagram view as a PNG image.
 
-### Edge output
+### Save Snapshot
+Downloads a reusable `.prisma-erd.json` snapshot containing the schema, parse result, and graph.
 
-Relation edges currently include:
-- source model
-- target model
-- relation field name
-- relation arity
-- raw relation field attributes
+### Open Snapshot
+Loads a previously saved snapshot and restores the diagram into the app.
+
+### Current export limitation
+
+The PNG export captures the current rendered diagram container view. In a later milestone we can improve export quality for larger diagrams and add SVG export.
 
 ## Requirements
 
@@ -173,46 +214,86 @@ Relation edges currently include:
 
 ## Installation
 
+### Root project
+
 ```bash
 git clone https://github.com/omshinde04/Prisma-erd.git
 cd Prisma-erd
 npm install
 ```
 
+### Frontend
+
+```bash
+npm install --prefix frontend
+```
+
 ## Running the Project
 
-### Start the application bootstrap
+### Backend/bootstrap validation
 
 ```bash
 npm start
 ```
 
-Expected behavior:
-
-- startup configuration is validated
-- the ERD pipeline foundation is initialized
-- structured JSON logs are printed
-- the process exits successfully in default `oneshot` mode
-
-### Run in persistent mode
-
-```bash
-APP_STARTUP_MODE=server npm start
-```
-
-Expected behavior:
-
-- the application starts and stays alive
-- logs confirm the runtime is ready
-- the process shuts down gracefully on `SIGINT` or `SIGTERM`
-
-## Running Tests
+### Run backend tests
 
 ```bash
 npm test
 ```
 
-The current tests validate:
+### Start the frontend visualizer
+
+```bash
+npm run dev --prefix frontend
+```
+
+Then open the local Vite URL shown in the terminal, typically:
+
+```text
+http://localhost:5173
+```
+
+## Using the Visualizer
+
+### Paste schema
+1. Open the frontend app.
+2. Paste your Prisma schema into the textarea.
+3. Click `Generate ERD`.
+4. Inspect the generated diagram.
+
+### Upload file
+1. Click `Upload file`.
+2. Select a local `.prisma` file.
+3. The file content is loaded into the textarea.
+4. The diagram is generated automatically.
+
+### Export graph
+1. Generate a diagram.
+2. Click `Export Graph JSON`.
+3. Share the downloaded JSON if needed for structured output use cases.
+
+### Export image
+1. Generate a diagram.
+2. Click `Export PNG`.
+3. Share the downloaded image in chat, docs, or tickets.
+
+### Save and reopen snapshot
+1. Generate a diagram.
+2. Click `Save Snapshot`.
+3. Send the `.prisma-erd.json` file to another developer.
+4. They open the app and click `Open Snapshot`.
+5. The schema and diagram are restored.
+
+## Running Tests
+
+### Root tests
+
+```bash
+npm test
+```
+
+The current root tests validate:
 
 - inline Prisma schema input normalization
 - file-based schema loading
@@ -227,6 +308,12 @@ The current tests validate:
 - graph node generation
 - graph edge generation
 - end-to-end ERD generation service behavior
+
+### Frontend build validation
+
+```bash
+npm run build --prefix frontend
+```
 
 ## Example Supported Schema
 
@@ -261,50 +348,6 @@ From the schema above, the current ERD generation foundation can create:
 - relation edge: `User.posts -> Post`
 - relation edge: `Post.user -> User`
 
-## Example Graph Output Shape
-
-```json
-{
-  "nodes": [
-    {
-      "id": "model:User",
-      "type": "model",
-      "label": "User",
-      "data": {
-        "name": "User",
-        "fields": [
-          {
-            "name": "id",
-            "type": "Int",
-            "kind": "scalar",
-            "isList": false,
-            "isOptional": false,
-            "attributes": ["@id"]
-          }
-        ],
-        "blockAttributes": []
-      }
-    }
-  ],
-  "edges": [
-    {
-      "id": "relation:Post:user:User",
-      "source": "model:Post",
-      "target": "model:User",
-      "label": "user",
-      "type": "relation",
-      "data": {
-        "from": "Post",
-        "to": "User",
-        "field": "user",
-        "arity": "one",
-        "attributes": ["@relation(fields:", "[userId],", "references:", "[id])"]
-      }
-    }
-  ]
-}
-```
-
 ## Roadmap
 
 ### Phase 1 — Core Foundation
@@ -316,20 +359,22 @@ From the schema above, the current ERD generation foundation can create:
 - parser foundation for models, enums, and relations
 - graph contracts
 - graph generation foundation
+- visualizer UI foundation
+- export and snapshot sharing foundation
 - tests and documentation
 
-### Phase 2 — Richer Prisma Schema Intelligence
+### Phase 2 — Richer Export and Sharing
+- SVG export
+- improved high-resolution image export
+- larger-diagram export strategy
+- link-sharing architecture planning
+
+### Phase 3 — Richer Prisma Schema Intelligence
 - composite type parsing
 - index extraction
 - constraint extraction
 - richer field metadata
 - improved Prisma syntax coverage
-
-### Phase 3 — Visualizer UI Foundation
-- add React frontend foundation
-- render ERD using React Flow
-- automatic layout with ELK.js
-- support paste and file upload flows
 
 ### Phase 4 — Integration Layer
 - MCP server and Zed integration
@@ -344,6 +389,8 @@ Current validation performed locally should include:
 npm install
 npm start
 npm test
+npm install --prefix frontend
+npm run build --prefix frontend
 NODE_ENV=staging npm start
 ```
 
