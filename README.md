@@ -32,6 +32,7 @@ Completed so far:
 - ES Modules setup
 - runnable Node.js bootstrap
 - startup configuration validation
+- schema-based configuration parsing with Zod
 - structured JSON logging
 - graceful shutdown support for persistent mode
 
@@ -94,6 +95,7 @@ npm start
 Expected behavior:
 
 - application startup is validated
+- configuration is parsed through a Zod schema
 - structured JSON logs are printed
 - the process exits successfully in default `oneshot` mode
 
@@ -115,6 +117,18 @@ Expected behavior:
 npm run dev
 ```
 
+### Validate configuration failures
+
+```bash
+NODE_ENV=staging npm start
+```
+
+Expected behavior:
+
+- startup fails fast
+- the console prints a readable configuration error
+- invalid fields are listed explicitly
+
 ## Environment Variables
 
 | Variable | Required | Default | Description |
@@ -124,9 +138,19 @@ npm run dev
 
 ## Example Output
 
+### Successful startup
+
 ```json
 {"timestamp":"2026-07-06T00:00:00.000Z","level":"info","message":"Starting application bootstrap","service":"prisma-visual-diagram-generator","metadata":{"environment":"development","startupMode":"oneshot"}}
 {"timestamp":"2026-07-06T00:00:00.100Z","level":"info","message":"Bootstrap completed successfully","service":"prisma-visual-diagram-generator","metadata":{"status":"ready","mode":"oneshot"}}
+```
+
+### Invalid configuration
+
+```text
+[fatal] Application failed to start
+Invalid application configuration
+- nodeEnv: Invalid option: expected one of "development"|"test"|"production"
 ```
 
 ## Architecture Direction
@@ -168,10 +192,12 @@ This repository is being developed with the following principles:
 Current validation performed locally:
 
 ```bash
+npm install
 npm start
+NODE_ENV=staging npm start
 ```
 
-This confirms the bootstrap entrypoint runs successfully.
+This confirms the bootstrap entrypoint runs successfully and invalid runtime configuration fails fast with readable output.
 
 ## Contributing
 

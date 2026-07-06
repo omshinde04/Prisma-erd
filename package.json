@@ -12,6 +12,9 @@
     "dev": "node --watch src/index.js",
     "test": "node --test"
   },
+  "dependencies": {
+    "zod": "^4.0.5"
+  },
   "keywords": [
     "mcp",
     "prisma",
